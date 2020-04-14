@@ -1,0 +1,49 @@
+table, th, td {
+    border: 1px solid grey;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+}
+
+th {
+    background-color: #d4dfff;
+    /*background-color: #2A2D3E;
+    color: white;*/
+    text-transform: uppercase;
+    font-size: smaller;
+    position: relative;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+.darkRow {
+    background-color: #F4F7FC;
+}
+
+.tableError {
+    color: red;
+    background-color: #ffc8c8;
+    padding: 10px;
+}
+
+.sortBy:before,
+.sortBy:after {
+	border: 5px solid transparent;
+	content: "";
+	display: block;
+	height: 0;
+	right: 5px;
+	top: 50%;
+	position: absolute;
+    width: 0;
+}
+.sortBy:before {
+	border-bottom-color: #777;
+	margin-top: -11px;
+}
+.sortBy:after {
+	border-top-color: #777;
+	margin-top: 2px;
+}

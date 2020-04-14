@@ -1,5 +1,5 @@
 import React from 'react';
-import Table from './Table'
+import TableDemo from './TableDemo'
 import './App.css';
 
 function App() {
@@ -9,7 +9,9 @@ function App() {
             <h1>A Reusable React Table Demo</h1>
         </div>
         <div className="App-body">
-            <Table />
+            <div className="App-content-wrapper">
+                <TableDemo />
+            </div>
         </div>
     </div>
   );
