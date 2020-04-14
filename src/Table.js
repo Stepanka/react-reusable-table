@@ -7,11 +7,17 @@ function TableHeader(props) {
     return (
         <thead>
             <tr>
-                {props.cols.map((col, id) =>
-                    <th key={id} className="sortBy" onClick={(e) => props.onSortClick(id, e)}>
-                        {col}
-                    </th>
-                )}
+                {props.cols.map((col, id) => {
+                    const sortClass = (props.sortFields[id] === 'asc') ? 
+                                      'sortedAsc' : (props.sortFields[id] === 'desc' ?
+                                      'sortedDesc' : '');
+                    const classes = `sortBy ${sortClass}`;
+                    return(
+                        <th key={id} className={classes} onClick={(e) => props.onSortClick(id, e)}>
+                            {col}
+                        </th>
+                    )
+                })}
             </tr>
         </thead>
     );
@@ -27,26 +33,18 @@ function TableRow(props) {
     );
 }
 
-function TableError(props) {
-    return (
-        <div className="tableError">
-            {props.message}
-        </div>
-    );
-}
-
 class Table extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            sortedField: '',
+            sortedColumn: '',
+            sortFields: [],
             sortDirection: 'asc',
             sortedRows: []
         }
         this.prepareRow = this.prepareRow.bind(this);
         this.sortBy = this.sortBy.bind(this);
         this.toggleSortDirection = this.toggleSortDirection.bind(this);
-        this.setSortDirection = this.setSortDirection.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -54,6 +52,12 @@ class Table extends React.Component {
         if (nextProps.rows !== this.props.rows) {
             this.setState({
                 sortedRows: nextProps.rows
+            });
+        }
+        if (nextProps.cols !== this.props.cols) {
+            const sortFields = nextProps.cols.map(() => '');
+            this.setState({
+                sortFields: sortFields
             });
         }
     }
@@ -75,43 +79,45 @@ class Table extends React.Component {
         e.preventDefault();
         const fieldName = this.props.cols[fieldId].mapping;
         console.log("Sorting by ", fieldName);
-        console.log("Previous field: ", this.state.sortedField);
-        // TODO redo this toggling! it shouldn't change all the time, just within one column
-        this.toggleSortDirection();
-        console.log(this.state.sortDirection);
-        const sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [this.state.sortDirection]);
+
+        let sortFields= this.props.cols.map(() => '');
+        let sortedRows = [];
+
+        // Clicking on the same field more times with toggle the sorting direction
+        if (this.state.sortedField === fieldName) {
+            sortFields[fieldId] = this.state.sortDirection;
+            sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [sortFields[fieldId]]);
+            this.toggleSortDirection();
+        } else {
+            sortFields[fieldId] = 'asc';
+            sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [sortFields[fieldId]]);
+            this.setState({
+                sortDirection: 'desc'
+            });
+        }
+
         this.setState({
             sortedField: fieldName,
-            sortedRows: sortedRows
-        });
-        console.log(sortedRows);
-    }
-
-    setSortDirection(val) {
-        this.setState({
-            sortDirection: val
+            sortedRows: sortedRows,
+            sortFields: sortFields
         });
     }
 
     toggleSortDirection() {
-        console.log("toggling");
-        console.log("previous direction: ", this.state.sortDirection);
         const newDir = this.state.sortDirection === 'asc' ? 'desc' : 'asc';
-        console.log("new direction: ", newDir);
         this.setState({
             sortDirection: newDir
         });
     }
 
     render () {
-        // const rows = this.state.sortedField === "" ? this.props.rows : this.state.sortedRows;
         const rows = this.state.sortedRows;
 
         return (
             <div>
             <table>
                 <TableHeader cols={this.props.cols.map(c => c.header)}
-                             onSortClick={this.sortBy}/>
+                             onSortClick={this.sortBy} sortFields={this.state.sortFields}/>
                 <tbody>
                     { rows.map((row, id) =>
                         <TableRow key={id} id={id} data={this.prepareRow(row)} />
