@@ -83,21 +83,21 @@ class TableDemo extends React.Component {
         });
 
         // Load the first chunk
-        for(let i = 0; i < chunkSize; i++) {
-            testData.push(testData[0]);
-        }
-        this.setState({
-            rows: testData
-        });
-
-
-        // fetch("https://randomuser.me/api/?results=" + chunkSize)
-        // .then(results => results.json())
-        // .then(data => {
-        //     this.setState({
-        //         rows: data.results
-        //     });
+        // for(let i = 0; i < chunkSize; i++) {
+        //     testData.push(testData[0]);
+        // }
+        // this.setState({
+        //     rows: testData
         // });
+
+
+        fetch("https://randomuser.me/api/?results=" + chunkSize)
+        .then(results => results.json())
+        .then(data => {
+            this.setState({
+                rows: data.results
+            });
+        });
     }
 
     loadAnotherChunk() {

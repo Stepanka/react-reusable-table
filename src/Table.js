@@ -39,34 +39,73 @@ class Table extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            sortedField: "",
+            sortedField: '',
+            sortDirection: 'asc',
             sortedRows: []
         }
         this.prepareRow = this.prepareRow.bind(this);
         this.sortBy = this.sortBy.bind(this);
-    }
-    componentDidMount() {
-        console.log(this.props);// <-- empty
+        this.toggleSortDirection = this.toggleSortDirection.bind(this);
+        this.setSortDirection = this.setSortDirection.bind(this);
     }
 
-    sortBy(fieldId, e) {
-        e.preventDefault();
-        let fieldName = this.props.cols[fieldId].mapping;
-        console.log("Sorting by ", fieldName);
-        let sortedRows = this.state.rows;
-        sortedRows = _.orderBy(sortedRows, ['email'],['asc']);
-        this.setState({
-            sortedRows: sortedRows
-        });
-        console.log(sortedRows);
+    componentWillReceiveProps(nextProps) {
+        // Any time input props.rows changes, update the state.sortedRows
+        if (nextProps.rows !== this.props.rows) {
+            this.setState({
+                sortedRows: nextProps.rows
+            });
+        }
     }
 
     prepareRow(rowData) {
         return this.props.cols.map(c => _.get(rowData, c.mapping));
     }
 
+    prepareRows() {
+        const rows = this.props.rows.map((row, id) =>
+            this.prepareRow(row)
+        );
+        this.setState({
+            sortedRows: rows
+        });
+    }
+
+    sortBy(fieldId, e) {
+        e.preventDefault();
+        const fieldName = this.props.cols[fieldId].mapping;
+        console.log("Sorting by ", fieldName);
+        console.log("Previous field: ", this.state.sortedField);
+        // TODO redo this toggling! it shouldn't change all the time, just within one column
+        this.toggleSortDirection();
+        console.log(this.state.sortDirection);
+        const sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [this.state.sortDirection]);
+        this.setState({
+            sortedField: fieldName,
+            sortedRows: sortedRows
+        });
+        console.log(sortedRows);
+    }
+
+    setSortDirection(val) {
+        this.setState({
+            sortDirection: val
+        });
+    }
+
+    toggleSortDirection() {
+        console.log("toggling");
+        console.log("previous direction: ", this.state.sortDirection);
+        const newDir = this.state.sortDirection === 'asc' ? 'desc' : 'asc';
+        console.log("new direction: ", newDir);
+        this.setState({
+            sortDirection: newDir
+        });
+    }
+
     render () {
-        const rows = this.state.sortedField === "" ? this.props.rows : this.state.sortedRows;
+        // const rows = this.state.sortedField === "" ? this.props.rows : this.state.sortedRows;
+        const rows = this.state.sortedRows;
 
         return (
             <div>
