@@ -8,13 +8,16 @@ function TableHeader(props) {
         <thead>
             <tr>
                 {props.cols.map((col, id) => {
-                    const sortClass = (props.sortFields[id] === 'asc') ? 
-                                      'sortedAsc' : (props.sortFields[id] === 'desc' ?
+                    const sortClass = (col.sorting === 'asc') ? 
+                                      'sortedAsc' : (col.sorting === 'desc' ?
                                       'sortedDesc' : '');
                     const classes = `sortBy ${sortClass}`;
                     return(
-                        <th key={id} className={classes} onClick={(e) => props.onSortClick(id, e)}>
-                            {col}
+                        <th key={id}
+                            className={classes}
+                            style={{width: col.width}}
+                            onClick={(e) => props.onSortClick(id, e)}>
+                            {col.header}
                         </th>
                     )
                 })}
@@ -38,7 +41,7 @@ class Table extends React.Component {
         super(props);
         this.state = {
             sortedColumn: '',
-            sortFields: [],
+            columns: [],
             sortDirection: 'asc',
             sortedRows: []
         }
@@ -55,9 +58,11 @@ class Table extends React.Component {
             });
         }
         if (nextProps.cols !== this.props.cols) {
-            const sortFields = nextProps.cols.map(() => '');
+            const columns = nextProps.cols.map((c) => { 
+                return { header: c.header, sorting: '', width: '' };
+            });
             this.setState({
-                sortFields: sortFields
+                columns: columns
             });
         }
     }
@@ -66,31 +71,25 @@ class Table extends React.Component {
         return this.props.cols.map(c => _.get(rowData, c.mapping));
     }
 
-    prepareRows() {
-        const rows = this.props.rows.map((row, id) =>
-            this.prepareRow(row)
-        );
-        this.setState({
-            sortedRows: rows
-        });
-    }
-
     sortBy(fieldId, e) {
         e.preventDefault();
         const fieldName = this.props.cols[fieldId].mapping;
-        console.log("Sorting by ", fieldName);
+        // console.log("Sorting by ", fieldName);
 
-        let sortFields= this.props.cols.map(() => '');
+        let columns = this.state.columns.map((c) => {
+            return { header: c.header, sorting: '', width: c.width };
+        });
+        console.log(columns);
         let sortedRows = [];
 
         // Clicking on the same field more times with toggle the sorting direction
         if (this.state.sortedField === fieldName) {
-            sortFields[fieldId] = this.state.sortDirection;
-            sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [sortFields[fieldId]]);
+            columns[fieldId].sorting = this.state.sortDirection;
+            sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [columns[fieldId].sorting]);
             this.toggleSortDirection();
         } else {
-            sortFields[fieldId] = 'asc';
-            sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [sortFields[fieldId]]);
+            columns[fieldId].sorting = 'asc';
+            sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [columns[fieldId].sorting]);
             this.setState({
                 sortDirection: 'desc'
             });
@@ -99,7 +98,7 @@ class Table extends React.Component {
         this.setState({
             sortedField: fieldName,
             sortedRows: sortedRows,
-            sortFields: sortFields
+            columns: columns
         });
     }
 
@@ -112,12 +111,11 @@ class Table extends React.Component {
 
     render () {
         const rows = this.state.sortedRows;
-
+        const columns = this.state.columns;
         return (
             <div>
             <table>
-                <TableHeader cols={this.props.cols.map(c => c.header)}
-                             onSortClick={this.sortBy} sortFields={this.state.sortFields}/>
+                <TableHeader cols={columns} onSortClick={this.sortBy}/>
                 <tbody>
                     { rows.map((row, id) =>
                         <TableRow key={id} id={id} data={this.prepareRow(row)} />
