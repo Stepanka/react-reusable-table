@@ -1,7 +1,8 @@
 import React from 'react';
+import _ from 'lodash';
 import Table from './Table'
 
-let chunkSize = 10;
+let chunkSize = 20;
 
 let testData = [{
     "gender": "male",
@@ -103,6 +104,14 @@ class TableDemo extends React.Component {
     loadAnotherChunk() {
         // Add a new chunk of data to the existing data
         console.log("Loading more data...");
+        fetch("https://randomuser.me/api/?results=" + chunkSize)
+        .then(results => results.json())
+        .then(data => {
+            let newData = _.concat(this.state.rows, ...data.results);
+            this.setState({
+                rows: newData
+            });
+        });
     }
 
     render () {
