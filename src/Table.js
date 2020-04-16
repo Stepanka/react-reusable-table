@@ -1,48 +1,11 @@
 import React from 'react';
 import _ from 'lodash';
-import Draggable from 'react-draggable';
+
+import TableHeader from './TableHeader';
+import TableRow from './TableRow';
 
 import './Table.css';
 
-
-function TableHeader(props) {
-    return (
-        <thead>
-            <tr>
-                { props.cols.map((col, id) => {
-                    const sortClass = (col.sorting === 'asc') ? 
-                                      'sortedAsc' : (col.sorting === 'desc' ?
-                                      'sortedDesc' : '');
-                    const classes = `sortBy ${sortClass}`;
-                    return(
-                        <th className="headerCell" key={id} style={{ width: col.width + 'px' }}>
-                            <div className={classes} onClick={(e) => props.onSortClick(e, id)}>{col.header}</div>
-                            <Draggable
-                                axis="x"
-                                scale={1}
-                                position={{x: 0, y: 0}}
-                                onStart={props.onResizeStart}
-                                onDrag={(e) => props.onResizeDrag(e, id)}
-                                onStop={props.onResizeStop}>
-                                <div className="resizeHandle"></div>
-                            </Draggable>
-                        </th>
-                    )
-                })}
-            </tr>
-        </thead>
-    );
-}
-
-function TableRow(props) {
-    return (
-        <tr className={ props.id % 2 !== 0 ? "darkRow" : "" }>
-            {props.data.map((cell, id) =>
-                <td key={id}>{cell}</td>
-            )}
-        </tr>
-    );
-}
 
 class Table extends React.Component {
     constructor(props) {

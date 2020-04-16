@@ -57,22 +57,22 @@ th {
 }
 
 .sortBy:before {
-	border-bottom-color: white;
+	border-bottom-color: #0e193a;
 	margin-top: -11px;
 }
 
 .sortBy:after {
-	border-top-color: white;
+	border-top-color: #0e193a;
 	margin-top: 2px;
 }
 
 .sortBy.sortedDesc:before {
-	border-bottom-color: #f9ec50;
+	border-bottom-color: white;
 	margin-top: -11px;
 }
 
 .sortBy.sortedAsc:after {
-	border-top-color: #f9ec50;
+	border-top-color: white;
 	margin-top: 2px;
 }
 

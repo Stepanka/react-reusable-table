@@ -84,6 +84,7 @@ class TableDemo extends React.Component {
         });
 
         // Load the first chunk
+
         // for(let i = 0; i < chunkSize; i++) {
         //     testData.push(testData[0]);
         // }
@@ -116,7 +117,10 @@ class TableDemo extends React.Component {
 
     render () {
         return (
-            <Table cols={this.state.columns} rows={this.state.rows} chunkSize={chunkSize} onLazyLoad={this.loadAnotherChunk} />
+            <Table cols={this.state.columns}
+                   rows={this.state.rows}
+                   chunkSize={chunkSize}
+                   onLazyLoad={this.loadAnotherChunk} />
         );
     }
 }
