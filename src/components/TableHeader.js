@@ -20,9 +20,7 @@ function TableHeader(props) {
                                 axis='x'
                                 scale={1}
                                 position={{x: 0, y: 0}}
-                                onStart={props.onResizeStart}
-                                onDrag={(e) => props.onResizeDrag(e, id)}
-                                onStop={props.onResizeStop}>
+                                onDrag={(e) => props.onResizeDrag(e, id)}>
                                 <div className='resizeHandle'></div>
                             </Draggable>
                         </th>

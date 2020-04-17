@@ -1,7 +1,5 @@
 import React from 'react';
-// import { render } from '@testing-library/react';
-import Enzyme, { shallow, render, mount } from 'enzyme';
-
+import { shallow } from 'enzyme';
 import TableHeader from './TableHeader';
 
 describe('Table Header Component', () => {
@@ -21,6 +19,13 @@ describe('Table Header Component', () => {
         headers.forEach((header, id) => {
             expect(header.text()).toEqual(cols[id].header);
         });
+    });
+
+    it('is empty when given no data', () => {
+        const cols = [];
+        const container = shallow(<TableHeader cols={cols}/>);
+        const headers = container.find('.sortBy');
+        expect(headers).toHaveLength(cols.length);
     });
 
     it('can display an ascending sort arrow', () => {
@@ -58,9 +63,7 @@ describe('Table Header Component', () => {
         ];
 
         const fakeSort = jest.fn();
-
         const container = shallow(<TableHeader cols={cols} onSortClick={fakeSort}/>);
-        console.log(container.debug());
 
         const a = container.find(`[test-id='sortBy']`);
         expect(a).toHaveLength(3);
@@ -71,6 +74,7 @@ describe('Table Header Component', () => {
                 node.prop('test-id') === 'sortBy'
             )
         }).simulate('click', { target: {} });
+
         expect(fakeSort).toHaveBeenCalled();
         expect(fakeSort).toHaveBeenCalledWith(expect.anything(), 0);
 
@@ -80,6 +84,7 @@ describe('Table Header Component', () => {
                 node.prop('test-id') === 'sortBy'
             )
         }).find(`[test-id='sortBy']`).simulate('click', { target: {} });
+
         expect(fakeSort).toHaveBeenCalled();
         expect(fakeSort).toHaveBeenCalledWith(expect.anything(), 2);
     });

@@ -1,7 +1,5 @@
 import React from 'react';
-// import { render } from '@testing-library/react';
-import Enzyme, { shallow, render, mount } from 'enzyme';
-
+import { shallow } from 'enzyme';
 import TableRow from './TableRow';
 
 describe('Table Row Component', () => {
@@ -29,5 +27,5 @@ describe('Table Row Component', () => {
         expect(cells).toHaveLength(data.length);
         expect(cells.at(2).text()).toEqual('');
     });
-
+    
 });

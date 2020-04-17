@@ -11,29 +11,30 @@ class Table extends React.Component {
     constructor(props) {
         super(props);
         this.minColWidth = 50;
+        this.tableWrapperRef = React.createRef();
         this.state = {
-            sortedFieldId: null,
-            columns: [],
-            sortDirection: 'asc',
+            rows: [],
             sortedRows: [],
+            columns: [],
+            sortedFieldId: null,
+            nextSortDirection: 'asc',
             isFetching: false
         }
         this.prepareRow = this.prepareRow.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.sortByFieldId =  this.sortByFieldId.bind(this);
-        this.toggleSortDirection = this.toggleSortDirection.bind(this);
-        this.onResizeStart = this.onResizeStart.bind(this);
+        this.setNextSortDirection = this.setNextSortDirection.bind(this);
         this.onResizeDrag = this.onResizeDrag.bind(this);
-        this.onResizeStop = this.onResizeStop.bind(this);
+        this.loadDataIfAtTheBottom = this.loadDataIfAtTheBottom.bind(this);
         this.lazyLoadChunk = this.lazyLoadChunk.bind(this);
     }
 
     componentDidMount() {
-        document.addEventListener('scroll', this.trackScrolling);
+        document.addEventListener('scroll', this.loadDataIfAtTheBottom);
     }
 
     componentWillUnmount() {
-        document.removeEventListener('scroll', this.trackScrolling);
+        document.removeEventListener('scroll', this.loadDataIfAtTheBottom);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -43,21 +44,6 @@ class Table extends React.Component {
                 sortedRows: nextProps.rows,
                 isFetching: false
             });
-            // If the data does not fill the whole page, automatically load more
-            setTimeout(function() {
-                this.trackScrolling();
-            }.bind(this), 1000);
-
-            // If sorting is on, turn it off
-            if (this.state.sortedFieldId !== null) {
-                this.state.sortedFieldId = null;
-                const columns = this.state.columns.map((c) => { 
-                    return { header: c.header, sorting: '', width: c.width };
-                });
-                this.setState({
-                    columns: columns
-                });
-            }
         }
         // New columns data
         if (nextProps.cols !== this.props.cols) {
@@ -70,12 +56,30 @@ class Table extends React.Component {
         }
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        // Row data has been loaded
+        if (prevProps.rows !== this.props.rows) {
+            this.loadDataIfAtTheBottom();
+
+            // If sorting is on, turn it off
+            if (this.state.sortedFieldId !== null) {
+                const columns = this.state.columns.map((c) => { 
+                    return { header: c.header, sorting: '', width: c.width };
+                });
+                this.setState({
+                    columns: columns,
+                    sortedFieldId: null
+                });
+            }
+        }
+      }
+
     isBottom(el) {
         return el.getBoundingClientRect().bottom <= window.innerHeight;
     }
 
-    trackScrolling = () => {
-        const wrappedElement = document.getElementById('tableWrapper');
+    loadDataIfAtTheBottom() {
+        const wrappedElement = this.tableWrapperRef.current;
         if (this.isBottom(wrappedElement)) {
             console.log('Bottom reached');
             // Show loader and wait some time
@@ -89,34 +93,35 @@ class Table extends React.Component {
     }
 
     lazyLoadChunk() {
-        console.log('Lazy load!');
         this.props.onLazyLoad();
-        //document.removeEventListener('scroll', this.trackScrolling);
     }
 
     prepareRow(rowData) {
         return this.props.cols.map(c => _.get(rowData, c.mapping));
     }
 
+    handleSort(e, fieldId) {
+        e.preventDefault();
+        this.sortByFieldId(fieldId);
+    }
+
     sortByFieldId(fieldId) {
         const fieldName = this.props.cols[fieldId].mapping;
-        console.log('Sorting by ', fieldName);
         let sortedRows = [];
         let columns = this.state.columns.map((c) => {
             return { header: c.header, sorting: '', width: c.width };
         });
 
-        // Clicking on the same field more times with toggle the sorting direction
-        // But not after more data has been loaded
+        // Clicking on the same field more times will toggle the sorting direction
         if (this.state.sortedFieldId === fieldId) {
-            columns[fieldId].sorting = this.state.sortDirection;
+            columns[fieldId].sorting = this.state.nextSortDirection;
             sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [columns[fieldId].sorting]);
-            this.toggleSortDirection();
+            this.setNextSortDirection();
         } else {
             columns[fieldId].sorting = 'asc';
             sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [columns[fieldId].sorting]);
             this.setState({
-                sortDirection: 'desc'
+                nextSortDirection: 'desc'
             });
         }
 
@@ -127,26 +132,14 @@ class Table extends React.Component {
         });
     }
 
-    handleSort(e, fieldId) {
-        e.preventDefault();
-        this.sortByFieldId(fieldId);
-    }
-
-    toggleSortDirection() {
-        const newDir = this.state.sortDirection === 'asc' ? 'desc' : 'asc';
+    setNextSortDirection() {
+        const newDir = this.state.nextSortDirection === 'asc' ? 'desc' : 'asc';
         this.setState({
-            sortDirection: newDir
+            nextSortDirection: newDir
         });
     }
 
-    onResizeStart(e, colId, width) {
-        console.log('Resizing started!');
-        console.log('initial width:', width);
-    }
-
     onResizeDrag(e, colId) {
-        console.log('Resizing in progress...');
-
         // The current cell will shrink/grow and its neighbor to the right will grow/shrink
         let newColumns = this.state.columns;
         
@@ -154,6 +147,7 @@ class Table extends React.Component {
             let newWidth = parseInt(newColumns[colId].width) + e.movementX;
             let newNeighborWidth = parseInt(newColumns[colId+1].width) - e.movementX;
             let widthTogether = parseInt(newColumns[colId].width) + parseInt(newColumns[colId+1].width);
+
             if (newWidth > this.minColWidth &&
                 newNeighborWidth > this.minColWidth &&
                 (newWidth + newNeighborWidth) <= widthTogether) {
@@ -166,20 +160,14 @@ class Table extends React.Component {
         }
     }
 
-    onResizeStop() {
-        console.log('Resizing completed!');
-    }
-
     render () {
         const rows = this.state.sortedRows;
         const columns = this.state.columns;
         const resizeHandlers = {
-            onResizeStart: this.onResizeStart,
             onResizeDrag: this.onResizeDrag,
-            onResizeStop: this.onResizeStop
         };
         return (
-            <div id='tableWrapper'>
+            <div id='tableWrapper' ref={this.tableWrapperRef} >
             <table> 
                 <TableHeader cols={columns} onSortClick={this.handleSort} {...resizeHandlers} />
                 <tbody>
