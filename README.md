@@ -36,6 +36,8 @@ this.state = {
     }],
 };
 
+...
+
 render () {
     return (
         <Table cols={this.state.columns} data={this.state.data} onLazyLoad={this.yourLazyLoadFunction} />
