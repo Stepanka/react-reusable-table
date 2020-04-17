@@ -45,7 +45,7 @@ render () {
 }
 ```
 
-`yourLazyLoadFunction` will fetch the data and update the `exampleColumns`.
+`yourLazyLoadFunction` will fetch the data and update `this.state.data`.
 
 For details, see [components/TableDemo.js](./components/TableDemo.js)
 
