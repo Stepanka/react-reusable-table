@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import Table from './Table'
+import Table from './components/Table'
 
 let chunkSize = 20;
 

@@ -100,7 +100,7 @@ class Table extends React.Component {
 
     sortByFieldId(fieldId) {
         const fieldName = this.props.cols[fieldId].mapping;
-        console.log("Sorting by ", fieldName);
+        console.log('Sorting by ', fieldName);
         let sortedRows = [];
         let columns = this.state.columns.map((c) => {
             return { header: c.header, sorting: '', width: c.width };
@@ -140,12 +140,12 @@ class Table extends React.Component {
     }
 
     onResizeStart(e, colId, width) {
-        console.log("Resizing started!");
-        console.log("initial width:", width);
+        console.log('Resizing started!');
+        console.log('initial width:', width);
     }
 
     onResizeDrag(e, colId) {
-        console.log("Resizing in progress...");
+        console.log('Resizing in progress...');
 
         // The current cell will shrink/grow and its neighbor to the right will grow/shrink
         let newColumns = this.state.columns;
@@ -164,10 +164,10 @@ class Table extends React.Component {
                 });
             }
         }
-}
+    }
 
     onResizeStop() {
-        console.log("Resizing completed!");
+        console.log('Resizing completed!');
     }
 
     render () {
@@ -179,16 +179,19 @@ class Table extends React.Component {
             onResizeStop: this.onResizeStop
         };
         return (
-            <div id="tableWrapper">
-            <table>
+            <div id='tableWrapper'>
+            <table> 
                 <TableHeader cols={columns} onSortClick={this.handleSort} {...resizeHandlers} />
                 <tbody>
-                    { rows.map((row, id) =>
-                        <TableRow key={id} id={id} data={this.prepareRow(row)} />
-                    )}
+                    { rows.map((row, id) => {
+                        const preparedRow = this.prepareRow(row);
+                        return (
+                            <TableRow key={id} id={id} data={preparedRow} />
+                        )
+                    })}
                 </tbody>
             </table>
-            { this.state.isFetching && <div id="loader">Loading...</div> }
+            { this.state.isFetching && <div id='loader'>Loading...</div> }
             </div>
         );
     }
