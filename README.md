@@ -15,7 +15,16 @@ Clone the repo and then run `npm install` and `npm run start`.
 ## Example of the Table component usage
 
 ```
-const exampleData = [{
+...
+
+this.state = {
+    columns: [
+        { header: "First name", mapping: "name.first" },
+        { header: "Last name", mapping: "name.last" },
+        { header: "City", mapping: "location.city" },
+        { header: "Email", mapping: "email" },
+    ],
+    data: [{
       "name": {
         "first": "brad",
         "last": "gibson"
@@ -24,20 +33,17 @@ const exampleData = [{
         "city": "kilcoole",
       },
       "email": "brad.gibson@example.com"
-    }
-];
+    }],
+};
 
-const exampleColumns = [
-    { header: "First name", mapping: "name.first" },
-    { header: "Last name", mapping: "name.last" },
-    { header: "City", mapping: "location.city" },
-    { header: "Email", mapping: "email" },
-];
-
-<Table cols={exampleColumns} data={exampleData} onLazyLoad={yourLazyLoadFunction} />
+render () {
+    return (
+        <Table cols={this.state.columns} data={this.state.data} onLazyLoad={this.yourLazyLoadFunction} />
+    );
+}
 ```
 
 `yourLazyLoadFunction` will fetch the data and update the `exampleColumns`.
 
-For details, see `components/TableDemo.js`.
+For details, see [components/TableDemo.js](./components/TableDemo.js)
 
