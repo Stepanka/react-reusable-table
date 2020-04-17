@@ -1,11 +1,9 @@
 import React from 'react';
 import _ from 'lodash';
-
 import TableHeader from './TableHeader';
 import TableRow from './TableRow';
 
 import './Table.css';
-
 
 class Table extends React.Component {
     constructor(props) {
@@ -13,13 +11,13 @@ class Table extends React.Component {
         this.minColWidth = 50;
         this.tableWrapperRef = React.createRef();
         this.state = {
-            rows: [],
             sortedRows: [],
             columns: [],
             sortedFieldId: null,
             nextSortDirection: 'asc',
             isFetching: false
         }
+
         this.prepareRow = this.prepareRow.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.sortByFieldId =  this.sortByFieldId.bind(this);
@@ -39,9 +37,9 @@ class Table extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         // New row data
-        if (nextProps.rows !== this.props.rows) {
+        if (nextProps.data !== this.props.data) {
             this.setState({
-                sortedRows: nextProps.rows,
+                sortedRows: nextProps.data,
                 isFetching: false
             });
         }
@@ -58,7 +56,7 @@ class Table extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         // Row data has been loaded
-        if (prevProps.rows !== this.props.rows) {
+        if (prevProps.data !== this.props.data) {
             this.loadDataIfAtTheBottom();
 
             // If sorting is on, turn it off
@@ -81,8 +79,7 @@ class Table extends React.Component {
     loadDataIfAtTheBottom() {
         const wrappedElement = this.tableWrapperRef.current;
         if (this.isBottom(wrappedElement)) {
-            console.log('Bottom reached');
-            // Show loader and wait some time
+            // Show loader and wait some time to show that data is being loaded
             this.setState({
                 isFetching: true
             });
@@ -112,12 +109,14 @@ class Table extends React.Component {
             return { header: c.header, sorting: '', width: c.width };
         });
 
+        // First click on the field will do an ascending sort
         // Clicking on the same field more times will toggle the sorting direction
         if (this.state.sortedFieldId === fieldId) {
             columns[fieldId].sorting = this.state.nextSortDirection;
             sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [columns[fieldId].sorting]);
             this.setNextSortDirection();
         } else {
+            // Perform an asc sort
             columns[fieldId].sorting = 'asc';
             sortedRows = _.orderBy(this.state.sortedRows, [fieldName], [columns[fieldId].sorting]);
             this.setState({

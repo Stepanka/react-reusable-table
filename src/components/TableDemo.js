@@ -7,7 +7,7 @@ class TableDemo extends React.Component {
         super(props);
         this.state = {
             columns: [],
-            rows: [],
+            data: [],
             chunkSize: 10
         };
         this.loadAnotherChunk = this.loadAnotherChunk.bind(this);
@@ -33,7 +33,7 @@ class TableDemo extends React.Component {
         .then(results => results.json())
         .then(data => {
             this.setState({
-                rows: data.results
+                data: data.results
             });
         });
     }
@@ -43,9 +43,9 @@ class TableDemo extends React.Component {
         fetch("https://randomuser.me/api/?results=" + this.state.chunkSize)
         .then(results => results.json())
         .then(data => {
-            let newData = _.concat(this.state.rows, ...data.results);
+            let newData = _.concat(this.state.data, ...data.results);
             this.setState({
-                rows: newData
+                data: newData
             });
         });
     }
@@ -53,7 +53,7 @@ class TableDemo extends React.Component {
     render () {
         return (
             <Table cols={this.state.columns}
-                   rows={this.state.rows}
+                   data={this.state.data}
                    onLazyLoad={this.loadAnotherChunk} />
         );
     }
